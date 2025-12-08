@@ -145,7 +145,7 @@ def exibir_relogio():
             centralizar(hora_formatada),
             "",
             "",
-            centralizar("Voltar: Pg Dn/0")
+            centralizar("Voltar: botão direito")
         ]
         
         renderizar_tela_fixa(titulo, conteudo, barra_status_esq="Opções", barra_status_dir="Voltar")
@@ -342,7 +342,7 @@ def iniciar_simulador():
             
             # 3. Não tem Função nem Submenu: Nenhuma Ação
             else:
-                renderizar_tela_fixa("INFO", [f"'{item_selecionado['titulo']}'", "Não implementado"], barra_status_dir="OK")
+                renderizar_tela_fixa("INFO", [f"'{item_selecionado['titulo']}'", "Inserir Cartão SIM"], barra_status_dir="OK")
                 time.sleep(1) 
         
         time.sleep(0.05) 

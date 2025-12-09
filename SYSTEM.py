@@ -56,7 +56,6 @@ def obter_entrada_tecla():
 
 def sair_do_simulador():
     """Função para sair do simulador e liberar o controle do teclado."""
-    # A renderizar_saudacao(False) será chamada pelo loop principal antes de sair
     print("\nDesligando...")
     # CRÍTICO: Libera todos os ganchos do teclado para evitar travamento do SO.
     keyboard.unhook_all() 
@@ -109,12 +108,14 @@ def exibir_agenda():
     ]
     
     while True:
+        # A barra de status dir aqui deve ser "Voltar" (para a TELA_ESPERA, que é o padrão)
         renderizar_tela_fixa(titulo, conteudo, barra_status_esq="Opções", barra_status_dir="Voltar")
         
         tecla = obter_entrada_tecla()
         
-        if tecla == "aux_dir" or tecla == "0": # Pg Dn ou 0 para Voltar
-            return "TELA_ESPERA" # Retorna para a tela de espera
+        # Agenda retorna para TELA_ESPERA
+        if tecla == "aux_dir" or tecla == "0": 
+            return "TELA_ESPERA" 
         
         if tecla in ["1", "2", "3", "4"]:
             renderizar_tela_fixa(titulo, conteudo + [centralizar("Ligando...")], barra_status_dir="Cancelar")
@@ -141,12 +142,14 @@ def exibir_relogio():
             centralizar("Voltar: botão direito")
         ]
         
+        # Relógio retorna para MENU_PRINCIPAL (que é de onde ele foi chamado via submenu)
         renderizar_tela_fixa(titulo, conteudo, barra_status_esq="Opções", barra_status_dir="Voltar")
         
         tecla = obter_entrada_tecla()
         
-        if tecla == "aux_dir" or tecla == "0": # Pg Dn ou 0 para Voltar
-            return "MENU_PRINCIPAL"
+        # A lógica de retorno para esta tela agora será tratada pelo loop principal
+        if tecla == "aux_dir" or tecla == "0": 
+            return "MENU_PRINCIPAL" # Retorno explícito para o menu anterior, no contexto atual
 
         time.sleep(0.5) 
 
@@ -158,9 +161,8 @@ def entrar_no_menu():
 
 def entrar_na_agenda():
     """Função para transição de TELA_ESPERA para AGENDA."""
-    # A função exibir_agenda contém um loop interno e retorna o próximo estado
     proximo_estado = exibir_agenda()
-    return proximo_estado # Deve retornar "TELA_ESPERA" se for para lá
+    return proximo_estado 
 
 def renderizar_tela_espera():
     """
@@ -173,10 +175,8 @@ def renderizar_tela_espera():
     nivel_bateria = "🔋🔋🔋" # 3 barras de 4
     nivel_rede = "📶📶📶" # 3 barras de 4
     
-    # Linha do Título: Rede e Bateria
     titulo = f"{nivel_rede}   {nivel_bateria}"
     
-    # Conteúdo principal (Horário e Data)
     conteudo_linhas = [
         "",
         centralizar(data_hora),
@@ -187,7 +187,6 @@ def renderizar_tela_espera():
         centralizar("Press. OK para Menu")
     ]
     
-    # Renderiza na moldura (Atalhos Menu e Agenda)
     renderizar_tela_fixa(
         titulo, 
         conteudo_linhas, 
@@ -195,7 +194,7 @@ def renderizar_tela_espera():
         barra_status_dir="Agenda"
     )
     
-    return "TELA_ESPERA" # Retorna o estado atual
+    return "TELA_ESPERA" 
 
 def tela_ligacao(numero_discado=""):
     """
@@ -205,11 +204,8 @@ def tela_ligacao(numero_discado=""):
     titulo = "CHAMADA"
     
     while True:
-        # Linha 4: Mostra o número discado
-        # Certifica que o número discado está centralizado
         conteudo = [""] * 3 + [centralizar(numero_discado)] + [""] * 5
         
-        # O botão auxiliar direito é 'Apagar'
         renderizar_tela_fixa(
             titulo, 
             conteudo, 
@@ -220,29 +216,25 @@ def tela_ligacao(numero_discado=""):
         tecla = obter_entrada_tecla()
         
         # 1. Tratar teclas numéricas (1-9, 0)
-        if tecla.isdigit() and len(numero_discado) < (CELULAR_W - 3): # Limita o tamanho
+        if tecla.isdigit() and len(numero_discado) < (CELULAR_W - 3):
             numero_discado += tecla
             continue
 
         # 2. Tratar Apagar (Pg Dn / aux_dir)
         elif tecla == "aux_dir":
             if numero_discado:
-                numero_discado = numero_discado[:-1] # Remove o último caractere
+                numero_discado = numero_discado[:-1]
             else:
-                # Se o número estiver vazio, volta para a Tela de Espera
                 return "TELA_ESPERA"
             continue
 
         # 3. Tratar Ligar (Pg Up / aux_esq)
         elif tecla == "aux_esq":
             if numero_discado:
-                # Requisito: Exibe a mensagem de erro "insira o Cartão SIM"
                 renderizar_tela_fixa("ERRO", [centralizar("Insira o")], centralizar("Cartão SIM"))
                 time.sleep(2)
-                # Volta para a tela de ligação para continuar ou apagar
                 continue
             else:
-                # Se não houver número, exibe um erro
                 renderizar_tela_fixa("INFO", [centralizar("Número vazio")], barra_status_dir="OK")
                 time.sleep(1)
                 continue
@@ -271,7 +263,7 @@ MENU_PRINCIPAL = {
         "submenu": {
             "1": {"titulo": "Nova Mensagem", "funcao": None},
             "2": {"titulo": "Cx. de Entrada", "funcao": None},
-            "0": {"titulo": "Voltar", "funcao": None}
+            # REMOVIDO: "0": {"titulo": "Voltar", "funcao": None}
         },
         "funcao": None
     },
@@ -285,10 +277,11 @@ MENU_PRINCIPAL = {
         "submenu": {
             "1": {"titulo": "Alarme", "funcao": None},
             "2": {"titulo": "Relógio digital", "funcao": exibir_relogio},
-            "0": {"titulo": "Voltar", "funcao": None}
+            # REMOVIDO: "0": {"titulo": "Voltar", "funcao": None}
         },
         "funcao": None
     },
+    # O item '0' permanece para Desligar
     "0": {"titulo": "Desligar", "funcao": sair_do_simulador, "submenu": None}
 }
 
@@ -298,21 +291,13 @@ TELA_ESPERA_MAPA = {
     "aux_esq": entrar_no_menu,   # Pg Up (Atalho Menu) -> Menu Principal
     "aux_dir": entrar_na_agenda, # Pg Dn (Atalho Agenda) -> Agenda
     # Teclas numéricas para discagem
-    "0": tela_ligacao, 
-    "1": tela_ligacao, 
-    "2": tela_ligacao, 
-    "3": tela_ligacao, 
-    "4": tela_ligacao, 
-    "5": tela_ligacao, 
-    "6": tela_ligacao, 
-    "7": tela_ligacao, 
-    "8": tela_ligacao, 
-    "9": tela_ligacao 
+    "0": tela_ligacao, "1": tela_ligacao, "2": tela_ligacao, "3": tela_ligacao, 
+    "4": tela_ligacao, "5": tela_ligacao, "6": tela_ligacao, "7": tela_ligacao, 
+    "8": tela_ligacao, "9": tela_ligacao 
 }
 
 # --- Funções de Renderização de Menu e Saudação ---
 
-# Ajuste na renderizar_saudacao (removendo a lógica desnecessária de imprimir_moldura_vazia)
 def renderizar_saudacao(iniciando: bool):
     """
     Imprime a moldura da tela com uma mensagem de saudação ou despedida.
@@ -344,27 +329,35 @@ def renderizar_menu(menu, selecao_atual_indice, titulo_menu="MENU PRINCIPAL"):
         prefixo = "->" if i == selecao_atual_indice else "  "
         
         titulo = item["titulo"]
-        if item.get("submenu") is not None:
+        # Não adiciona o > para itens que só têm a função de voltar pelo aux_dir
+        if item.get("submenu") is not None: 
             titulo += " >"
             
         conteudo_linhas.append(f"{prefixo}{chave}. {titulo}")
         
-    renderizar_tela_fixa(titulo_menu, conteudo_linhas, barra_status_esq="Menu", barra_status_dir="Voltar")
+    # A barra de status direita é sempre "Voltar"
+    renderizar_tela_fixa(titulo_menu, conteudo_linhas, barra_status_esq="Opções", barra_status_dir="Voltar")
 
 
 # --- Loop Principal de Execução ---
+
+# Adicionado rastreamento do histórico de menus para permitir o retorno adequado
+menu_history = [] 
 
 def iniciar_simulador():
     """Função principal para iniciar o loop de execução do simulador."""
     
     # Variáveis de Estado
+    global menu_history
+    menu_history = [] # Reinicia o histórico a cada execução
+    
     menu_atual = MENU_PRINCIPAL
     selecao_atual_indice = 0
     chaves_atuais = sorted(menu_atual.keys())
     titulo_atual = "MENU PRINCIPAL"
     
     simulador_ativo = True
-    estado_atual = "TELA_ESPERA" # Novo estado inicial
+    estado_atual = "TELA_ESPERA" 
 
     renderizar_saudacao (iniciando=True)
     
@@ -373,7 +366,7 @@ def iniciar_simulador():
         # 1. Renderizar a tela atual
         if estado_atual == "TELA_ESPERA":
             renderizar_tela_espera() 
-        elif estado_atual == "MENU_PRINCIPAL" or estado_atual.endswith("_SUBMENU"):
+        elif estado_atual == "MENU_PRINCIPAL" or len(menu_history) > 0: # Qualquer submenu
             renderizar_menu(menu_atual, selecao_atual_indice, titulo_atual)
         
         # 2. Ler a tecla pressionada
@@ -385,13 +378,11 @@ def iniciar_simulador():
                 funcao_chamada = TELA_ESPERA_MAPA[tecla]
                 
                 if tecla.isdigit():
-                    # Para números, entra na tela de ligação, passando o primeiro dígito
                     proximo_estado = tela_ligacao(numero_discado=tecla)
                 else:
-                    # Para atalhos (OK, PgUp, PgDn)
                     proximo_estado = funcao_chamada() 
                 
-                # Transição de estado após a função retornar
+                # Transição de estado
                 if proximo_estado == "MENU_PRINCIPAL":
                     estado_atual = "MENU_PRINCIPAL"
                     menu_atual = MENU_PRINCIPAL
@@ -402,59 +393,84 @@ def iniciar_simulador():
                     estado_atual = "TELA_ESPERA"
                 
             time.sleep(0.05)
-            continue # Volta ao topo do loop da TELA_ESPERA
+            continue 
         
-        # --- LÓGICA DO MENU (Existente) ---
+        # --- LÓGICA DO MENU ---
         
+        # A. Tratamento da tecla VOLTAR (aux_dir) - NOVO COMPORTAMENTO PADRÃO
+        if tecla == "aux_dir":
+            if len(menu_history) > 0:
+                # Se há histórico, volta para o menu anterior (Submenu -> Menu Principal)
+                menu_anterior_info = menu_history.pop() # Remove o último
+                
+                menu_atual = menu_anterior_info['menu']
+                titulo_atual = menu_anterior_info['titulo']
+                chaves_atuais = sorted(menu_atual.keys())
+                selecao_atual_indice = 0 # Reinicia a seleção
+                
+                # Se o histórico estiver vazio após o pop, volta para MENU_PRINCIPAL
+                if not menu_history:
+                    estado_atual = "MENU_PRINCIPAL" 
+            
+            elif estado_atual == "MENU_PRINCIPAL":
+                # Se estiver no Menu Principal, volta para a Tela de Espera
+                estado_atual = "TELA_ESPERA"
+                
+            continue # Processamento concluído
+        
+        # B. Navegação nos Menus
         if tecla == "down":
             selecao_atual_indice = (selecao_atual_indice + 1) % len(chaves_atuais)
         elif tecla == "up":
             selecao_atual_indice = (selecao_atual_indice - 1) % len(chaves_atuais)
-        # ... (restante da lógica de navegação numérica e OK/Espaço)
         
-        # Tecla de Ação (OK / Espaço) ou número selecionado:
-        if tecla == "ok" or (tecla.isdigit() and tecla in chaves_atuais):
+        # C. Seleção (OK ou Número)
+        elif tecla == "ok" or (tecla.isdigit() and tecla in chaves_atuais):
             
+            # Garante que a tecla numérica seleciona o item correto
+            if tecla.isdigit() and tecla in chaves_atuais:
+                selecao_atual_indice = chaves_atuais.index(tecla)
+
             chave_selecionada = chaves_atuais[selecao_atual_indice]
             item_selecionado = menu_atual[chave_selecionada]
             
-            # Tratamento de Opção 0 (Desligar ou Voltar)
-            if chave_selecionada == "0":
-                if item_selecionado["funcao"] is sair_do_simulador:
-                    renderizar_saudacao(iniciando=False) 
-                    sair_do_simulador()
-                    simulador_ativo = False
-                    break
-                
-                elif menu_atual != MENU_PRINCIPAL:
-                    menu_atual = MENU_PRINCIPAL
-                    chaves_atuais = sorted(menu_atual.keys())
-                    selecao_atual_indice = 0
-                    titulo_atual = "MENU PRINCIPAL"
-                    continue
-                
-                continue 
-
-            # Ação principal (OK/Seleção)
+            # Tratamento de Opção 0 (Desligar)
+            if chave_selecionada == "0" and item_selecionado["funcao"] is sair_do_simulador:
+                renderizar_saudacao(iniciando=False) 
+                sair_do_simulador()
+                simulador_ativo = False
+                break
+            
+            # 1. Tem Submenu: Entra no Submenu
             if item_selecionado.get("submenu") is not None:
+                # Salva o estado atual antes de entrar no próximo nível
+                menu_history.append({'menu': menu_atual, 'titulo': titulo_atual})
+                
                 menu_atual = item_selecionado["submenu"]
                 chaves_atuais = sorted(menu_atual.keys())
                 selecao_atual_indice = 0
                 titulo_atual = item_selecionado["titulo"]
                 
+            # 2. Tem Função: Executa a Função
             elif item_selecionado["funcao"] is not None:
                 proximo_estado = item_selecionado["funcao"]() 
                 
                 if proximo_estado == "MENU_PRINCIPAL":
+                    # Retorna ao estado do menu principal (após Agenda ou Relógio)
+                    menu_history = [] # Limpa o histórico
+                    estado_atual = "MENU_PRINCIPAL"
                     menu_atual = MENU_PRINCIPAL
                     chaves_atuais = sorted(menu_atual.keys())
                     selecao_atual_indice = 0
                     titulo_atual = "MENU PRINCIPAL"
+
                 elif proximo_estado == "TELA_ESPERA":
-                    estado_atual = "TELA_ESPERA" # Transição direta do Menu para a Espera (Agenda)
+                    estado_atual = "TELA_ESPERA"
+                    menu_history = [] # Sai de todos os menus
             
+            # 3. Não tem Função nem Submenu
             else:
-                renderizar_tela_fixa("INFO", [centralizar("Não implementado")], barra_status_dir="OK")
+                renderizar_tela_fixa("INFO", [centralizar(f"'{item_selecionado['titulo']}'"), centralizar("Não implementado")], barra_status_dir="OK")
                 time.sleep(1) 
         
         time.sleep(0.05) 

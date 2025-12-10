@@ -231,7 +231,7 @@ def tela_ligacao(numero_discado=""):
         # 3. Tratar Ligar (Pg Up / aux_esq)
         elif tecla == "aux_esq":
             if numero_discado:
-                renderizar_tela_fixa("ERRO", [centralizar("Insira o")], centralizar("Cartão SIM"))
+                renderizar_tela_fixa("ERRO", [centralizar("Insira o Cartão SIM")], centralizar("Cartão SIM"))
                 time.sleep(2)
                 continue
             else:
@@ -277,6 +277,21 @@ MENU_PRINCIPAL = {
         "submenu": {
             "1": {"titulo": "Alarme", "funcao": None},
             "2": {"titulo": "Relógio digital", "funcao": exibir_relogio},
+            "3": {"titulo": "Calculadora", "funcao": None},
+            "4": {"titulo": "Jogos", "funcao": None},
+            "5": {"titulo": "Navegador WAP", "funcao": None},
+            # REMOVIDO: "0": {"titulo": "Voltar", "funcao": None}
+        },
+        "funcao": None
+    },
+        "4": {
+        "titulo": "Configurações",
+        "submenu": {
+            "1": {"titulo": "Perfil", "funcao": None},
+            "2": {"titulo": "Data e Hora", "funcao": None},
+            "3": {"titulo": "Toques", "funcao": None},
+            "4": {"titulo": "Tela", "funcao": None},
+            "5": {"titulo": "Confs. Avançad.", "funcao": None},
             # REMOVIDO: "0": {"titulo": "Voltar", "funcao": None}
         },
         "funcao": None

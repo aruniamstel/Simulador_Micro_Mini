@@ -2,6 +2,7 @@ import os
 import time
 import keyboard 
 from datetime import datetime
+import FileManager
 
 # --- Constantes da Tela ---
 CELULAR_W = 22 # Largura da tela (colunas)
@@ -180,7 +181,7 @@ ESTRUTURA_GRADE = [
     {"titulo": "Ligações", "icone": "📞", "ref": "ligacoes"},
     {"titulo": "Câmera", "icone": "📷", "ref": "camera"},
     {"titulo": "Rádio", "icone": "📻", "ref": "radio"},
-    {"titulo": "Gerenc. Arq", "icone": "📁", "ref": "arquivos"},
+    {"titulo": "Gerenc. Arq", "icone": "📁", "ref": "arquivos", "funcao": FileManager.abrir_gerenciador},
     {"titulo": "Config.", "icone": "⚙️", "ref": "4"},
     {"titulo": "Serviços", "icone": "🌐", "ref": "servicos"},
     {"titulo": "Ferramentas", "icone": "🛠️", "ref": "3"}
@@ -292,6 +293,12 @@ def iniciar_simulador():
                 item_grade = ESTRUTURA_GRADE[selecao_grade_idx]
                 ref = item_grade["ref"]
                 
+                if "funcao" in item_grade and item_grade["funcao"] is not None:
+                    res = item_grade["funcao"]()
+                    if res == "MENU_PRINCIPAL":
+                        estado_atual = "MENU_PRINCIPAL"
+                        continue
+
                 if ref == "camera": exibir_camera()
                 elif ref in ["ligacoes", "radio", "arquivos", "servicos"]: 
                     exibir_indisponivel(item_grade["titulo"])

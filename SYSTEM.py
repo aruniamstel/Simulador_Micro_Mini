@@ -191,7 +191,8 @@ MENU_PRINCIPAL = {
     "1": {"titulo": "Mensagens", "submenu": {"1": {"titulo": "Nova Mensagem", "funcao": None}, "2": {"titulo": "Cx. de Entrada", "funcao": None}}, "funcao": None},
     "2": {"titulo": "Agenda", "funcao": exibir_agenda, "submenu": None},
     "3": {"titulo": "Ferramentas", "submenu": {"1": {"titulo": "Alarme", "funcao": None}, "2": {"titulo": "Relógio digital", "funcao": exibir_relogio}, "3": {"titulo": "Calculadora", "funcao": None}, "4": {"titulo": "Jogos", "funcao": None}, "5": {"titulo": "Navegador WAP", "funcao": None}}, "funcao": None},
-    "4": {"titulo": "Configurações", "submenu": {"1": {"titulo": "Perfil", "funcao": None}, "2": {"titulo": "Data e Hora", "funcao": None}, "3": {"titulo": "Toques", "funcao": None}, "4": {"titulo": "Tela", "funcao": None}, "5": {"titulo": "Confs. Avançad.", "funcao": None}}, "funcao": None}
+    "4": {"titulo": "Configurações", "submenu": {"1": {"titulo": "Perfil", "funcao": None}, "2": {"titulo": "Data e Hora", "funcao": None}, "3": {"titulo": "Toques", "funcao": None}, "4": {"titulo": "Tela", "funcao": None}, "5": {"titulo": "Confs. Avançad.", 
+    "submenu": {"1": {"titulo": "Sintonização", "funcao": None}, "2": {"titulo": "Estado memoria", "funcao": None}, "3": {"titulo": "Info d.Software", "funcao": None}, "4": {"titulo": "Resetar config.", "funcao": None}}, "funcao": None}}, "funcao": None}
 }
 
 TELA_ESPERA_MAPA = {
@@ -240,7 +241,7 @@ def renderizar_menu_lista(menu, selecao_atual_indice, titulo_menu):
         item = menu[chave]
         prefixo = "->" if i == selecao_atual_indice else "  "
         titulo = item["titulo"]
-        if item.get("submenu") is not None: titulo += " >"
+        #if item.get("submenu") is not None: titulo += " >"
         conteudo_linhas.append(f"{prefixo}{chave}. {titulo}")
     renderizar_tela_fixa(titulo_menu, conteudo_linhas, barra_status_esq="Opções", barra_status_dir="Voltar")
 

@@ -4,6 +4,7 @@ import keyboard
 from datetime import datetime
 import FileManager
 import Messages
+import ConfigManager
 
 # --- Constantes da Tela ---
 CELULAR_W = 22 # Largura da tela (colunas)
@@ -75,7 +76,10 @@ def renderizar_tela_fixa(titulo, conteudo_linhas, barra_status_esq="Opções", b
     tela[13] = B_V + status_esq + status_dir + B_V
 
     limpar_tela()
-    print('\n'.join(tela))
+    estilo = ConfigManager.config_manager.obter_estilo()
+    reset = "\033[0m"
+    print(estilo + '\n'.join(tela) + reset)
+    #print('\n'.join(tela))
 
 # --- Funcionalidades Específicas ---
 
@@ -192,8 +196,48 @@ MENU_PRINCIPAL = {
     "1": {"titulo": "Mensagens", "submenu": {"1": {"titulo": "Nova Mensagem", "funcao": Messages.nova_mensagem}, "2": {"titulo": "Cx. de Entrada", "funcao": None},  "3": {"titulo": "Enviadas", "funcao": Messages.mensagens_enviadas}}, "funcao": None},
     "2": {"titulo": "Agenda", "funcao": exibir_agenda, "submenu": None},
     "3": {"titulo": "Ferramentas", "submenu": {"1": {"titulo": "Alarme", "funcao": None}, "2": {"titulo": "Relógio digital", "funcao": exibir_relogio}, "3": {"titulo": "Calculadora", "funcao": None}, "4": {"titulo": "Jogos", "funcao": None}, "5": {"titulo": "Navegador WAP", "funcao": None}}, "funcao": None},
-    "4": {"titulo": "Configurações", "submenu": {"1": {"titulo": "Perfil", "funcao": None}, "2": {"titulo": "Data e Hora", "funcao": None}, "3": {"titulo": "Toques", "funcao": None}, "4": {"titulo": "Tela", "funcao": None}, "5": {"titulo": "Confs. Avançad.", 
-    "submenu": {"1": {"titulo": "Sintonização", "funcao": None}, "2": {"titulo": "Estado memoria", "funcao": None}, "3": {"titulo": "Info d.Software", "funcao": None}, "4": {"titulo": "Resetar config.", "funcao": None}}, "funcao": None}}, "funcao": None}
+    "4": {
+        "titulo": "Configurações",
+        "submenu": {
+            "1": {"titulo": "Perfil", "submenu": {
+                "1": {"titulo": "Geral", "funcao": None},
+                "2": {"titulo": "Silencioso", "funcao": None},
+                "3": {"titulo": "Auricular", "funcao": None},
+                "4": {"titulo": "Alto", "funcao": None}
+            }},
+            "2": {"titulo": "Data e Hora", "submenu": {
+                "1": {"titulo": "Definir Data", "funcao": None},
+                "2": {"titulo": "Definir Hora", "funcao": None},
+                "3": {"titulo": "Fuso horário", "funcao": None},
+                "4": {"titulo": "Hora automática", "funcao": None}
+            }},
+            "3": {"titulo": "Toques", "submenu": {
+                "1": {"titulo": "Toque Chamada", "funcao": None},
+                "2": {"titulo": "Toque Alarme", "funcao": None},
+                "3": {"titulo": "Toque Aviso", "funcao": None},
+                "4": {"titulo": "Sons Sistema", "funcao": None}
+            }},
+            "4": {"titulo": "Tela", "submenu": {
+                "1": {"titulo": "Duração Luz", "funcao": None},
+                "2": {"titulo": "Brilho", "funcao": None},
+                "3": {"titulo": "Saturação", "funcao": None},
+                "4": {"titulo": "Cor", "funcao": None},
+                "5": {"titulo": "Tema", "funcao": ConfigManager.config_manager.selecionar_tema}
+            }},
+            "5": {"titulo": "Confs. Avançad.", "submenu": {
+                "1": {"titulo": "Sintoniz.Rede", "funcao": None},
+                "2": {"titulo": "Memória", "funcao": None},
+                "3": {"titulo": "Info Software", "funcao": None},
+                "4": {"titulo": "Segurança", "funcao": ConfigManager.config_manager.gerenciar_pin},
+                "5": {"titulo": "Aplicativos", "funcao": None},
+                "6": {"titulo": "Chamadas", "funcao": None},
+                "7": {"titulo": "Idioma", "funcao": None},
+                "8": {"titulo": "Sincronizar", "funcao": None},
+                "9": {"titulo": "Resetar", "funcao": ConfigManager.config_manager.resetar_confirmacao}
+            }}
+        },
+        "funcao": None
+    }
 }
 
 TELA_ESPERA_MAPA = {
@@ -257,6 +301,9 @@ def iniciar_simulador():
     titulo_atual = "MENU PRINCIPAL"
 
     renderizar_saudacao(iniciando=True)
+    # NOVO: Verificação de Segurança antes de ligar
+    if not ConfigManager.config_manager.verificar_pin_boot():
+        return
     
     while True:
         # 1. Renderização baseada no estado

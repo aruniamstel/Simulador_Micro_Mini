@@ -5,17 +5,14 @@ from datetime import datetime
 
 class MessageManager:
     def __init__(self):
-        # Pasta onde as mensagens serão salvas
+        # Cria a pasta de destino se não existir
         self.diretorio_sms = os.path.join(os.getcwd(), "Telefone", "SMS")
         if not os.path.exists(self.diretorio_sms):
-            os.makedirs(self.diretorio_sms)
+            os.makedirs(self.diretorio_sms, exist_ok=True)
 
     def quebrar_texto(self, texto, largura=20):
-        """Quebra o texto em linhas conforme a largura da tela."""
-        linhas = []
-        for i in range(0, len(texto), largura):
-            linhas.append(texto[i:i+largura])
-        return linhas
+        """Divide o texto em linhas de 20 caracteres para caber na tela."""
+        return [texto[i:i+largura] for i in range(0, len(texto), largura)]
 
     def escrever_mensagem(self):
         import SYSTEM
@@ -25,57 +22,64 @@ class MessageManager:
         
         while True:
             # Lógica do cursor piscando
-            if time.time() - ultimo_pisca > 0.5:
+            if time.time() - ultimo_pisca > 0.4:
                 cursor_visivel = not cursor_visivel
                 ultimo_pisca = time.time()
 
-            # Prepara as linhas para exibição
+            # Prepara o conteúdo visual
+            # A primeira linha exibe a instrução, as outras o texto digitado
             texto_exibicao = mensagem + ("|" if cursor_visivel else " ")
-            linhas_corpo = self.quebrar_texto(texto_exibicao)
+            linhas_digitadas = self.quebrar_texto(texto_exibicao)
             
-            # Garante que sempre tenha 9 linhas para a renderização não quebrar
-            while len(linhas_corpo) < 9:
-                linhas_corpo.append("")
+            conteudo_tela = ["digite a sua mensagem:"] + linhas_digitadas
             
-            # Limite de segurança (9 linhas de 20 caracteres = 180 chars)
-            if len(mensagem) >= 180:
-                mensagem = mensagem[:180]
+            # Garante preenchimento de 9 linhas para manter a moldura estável
+            while len(conteudo_tela) < 9:
+                conteudo_tela.append("")
 
-            SYSTEM.renderizar_tela_fixa("NOVA MSG", linhas_corpo, barra_status_esq="Enviar", barra_status_dir="Apagar")
+            SYSTEM.renderizar_tela_fixa("NOVA MSG", conteudo_tela[:9], barra_status_esq="Enviar", barra_status_dir="Apagar")
             
-            # Captura de entrada (usando keyboard.read_event para pegar caracteres direto)
+            # Captura de entrada
             evento = keyboard.read_event(suppress=True)
             if evento.event_type == keyboard.KEY_DOWN:
-                tecla = evento.name
+                tecla = evento.name.lower()
                 
-                # Enviar (Page Up)
+                # Enviar (Page Up / aux_esq)
                 if tecla == "page up":
-                    if len(mensagem.strip()) > 0:
-                        self.salvar_mensagem(mensagem)
-                        SYSTEM.renderizar_tela_fixa("SMS", ["", "", SYSTEM.centralizar("Enviando..."), "", ""], barra_status_esq="", barra_status_dir="")
-                        time.sleep(1.5)
+                    if mensagem.strip():
+                        self.salvar_mensagem(mensagem) # Correção do TypeError aqui
+                        SYSTEM.renderizar_tela_fixa("SMS", ["", "", SYSTEM.centralizar("Mensagem"), SYSTEM.centralizar("Enviada!"), ""], barra_status_esq="", barra_status_dir="")
+                        time.sleep(2)
                         return "MENU_PRINCIPAL"
-                    
-                # Apagar (Backspace ou Page Down para sair)
-                elif tecla == "backspace":
-                    mensagem = mensagem[:-1]
+                
+                # Sair/Apagar tudo (Page Down / aux_dir)
                 elif tecla == "page down":
                     if mensagem == "": return "MENU_PRINCIPAL"
-                    mensagem = "" # Limpa se houver texto, sai se estiver vazio
+                    mensagem = "" # Limpa o texto primeiro
                 
-                # Digitação de caracteres (letras, números, espaço)
-                elif len(tecla) == 1: # Evita capturar "shift", "ctrl", etc
-                    mensagem += tecla
+                # Apagar caractere (Backspace)
+                elif tecla == "backspace":
+                    mensagem = mensagem[:-1]
+                
+                # Espaço
                 elif tecla == "space":
-                    mensagem += " "
+                    if len(mensagem) < 160: mensagem += " "
+                
+                # Letras e Números (PC Keyboard)
+                elif len(tecla) == 1:
+                    if len(mensagem) < 160: # Limite para caber na tela (aprox 8 linhas x 20 colunas)
+                        # Mantém a caixa alta/baixa original do teclado
+                        mensagem += evento.name 
 
-    def salvar_mensagem(self):
-        # Nome do arquivo baseado na data/hora
-        nome_arq = datetime.now().strftime("SMS_%Y%m%d_%H%M%S.txt")
+    def salvar_mensagem(self, texto):
+        """Grava a mensagem em um arquivo .txt com timestamp."""
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        nome_arq = f"SMS_{timestamp}.txt"
         caminho = os.path.join(self.diretorio_sms, nome_arq)
+        
         with open(caminho, "w", encoding="utf-8") as f:
             f.write(f"Data: {datetime.now().strftime('%d/%m/%Y %H:%M')}\n")
-            f.write("-" * 10 + "\n")
+            f.write("-" * 15 + "\n")
             f.write(texto)
 
     def listar_enviadas(self):
@@ -84,20 +88,22 @@ class MessageManager:
             arquivos = sorted([f for f in os.listdir(self.diretorio_sms) if f.endswith('.txt')], reverse=True)
             
             if not arquivos:
-                SYSTEM.renderizar_tela_fixa("ENVIADAS", ["", SYSTEM.centralizar("Caixa vazia")], barra_status_dir="Voltar")
+                SYSTEM.renderizar_tela_fixa("ENVIADAS", ["", "", SYSTEM.centralizar("Caixa vazia"), "", ""], barra_status_dir="Voltar")
                 if SYSTEM.obter_entrada_tecla() == "aux_dir": return "MENU_PRINCIPAL"
                 continue
 
             conteudo_tela = []
-            for i, arq in enumerate(arquivos[:9]): # Mostra as 9 últimas
-                data_str = arq.replace("SMS_", "").replace(".txt", "")
-                conteudo_tela.append(f"{i+1}. {data_str[:8]} {data_str[9:13]}")
+            for i, arq in enumerate(arquivos[:9]):
+                # Formata a exibição: "1. 15/01 22:30"
+                partes = arq.replace("SMS_", "").replace(".txt", "").split("_")
+                data, hora = partes[0], partes[1]
+                conteudo_tela.append(f"{i+1}. {data[6:8]}/{data[4:6]} {hora[:2]}:{hora[2:4]}")
 
             SYSTEM.renderizar_tela_fixa("ENVIADAS", conteudo_tela, barra_status_esq="Abrir", barra_status_dir="Voltar")
             
             tecla = SYSTEM.obter_entrada_tecla()
             if tecla == "aux_dir": return "MENU_PRINCIPAL"
-            if tecla.isdigit() and int(tecla) <= len(arquivos):
+            if tecla.isdigit() and 0 < int(tecla) <= len(arquivos):
                 self.ler_mensagem(arquivos[int(tecla)-1])
 
     def ler_mensagem(self, nome_arquivo):
@@ -107,10 +113,10 @@ class MessageManager:
             linhas = [l.strip() for l in f.readlines()]
             
         while True:
-            SYSTEM.renderizar_tela_fixa("MENSAGEM", linhas, barra_status_esq="", barra_status_dir="Sair")
+            SYSTEM.renderizar_tela_fixa("MENSAGEM", linhas, barra_status_esq="", barra_status_dir="Voltar")
             if SYSTEM.obter_entrada_tecla() == "aux_dir": break
 
-# Instância global para facilitar o acesso
+# Instâncias globais para o SYSTEM.py
 msg_manager = MessageManager()
 
 def nova_mensagem():

@@ -3,6 +3,7 @@ import time
 import keyboard 
 from datetime import datetime
 import FileManager
+import Messages
 
 # --- Constantes da Tela ---
 CELULAR_W = 22 # Largura da tela (colunas)
@@ -188,7 +189,7 @@ ESTRUTURA_GRADE = [
 ]
 
 MENU_PRINCIPAL = {
-    "1": {"titulo": "Mensagens", "submenu": {"1": {"titulo": "Nova Mensagem", "funcao": None}, "2": {"titulo": "Cx. de Entrada", "funcao": None}}, "funcao": None},
+    "1": {"titulo": "Mensagens", "submenu": {"1": {"titulo": "Nova Mensagem", "funcao": Messages.nova_mensagem}, "2": {"titulo": "Cx. de Entrada", "funcao": None},  "3": {"titulo": "Enviadas", "funcao": Messages.mensagens_enviadas}}, "funcao": None},
     "2": {"titulo": "Agenda", "funcao": exibir_agenda, "submenu": None},
     "3": {"titulo": "Ferramentas", "submenu": {"1": {"titulo": "Alarme", "funcao": None}, "2": {"titulo": "Relógio digital", "funcao": exibir_relogio}, "3": {"titulo": "Calculadora", "funcao": None}, "4": {"titulo": "Jogos", "funcao": None}, "5": {"titulo": "Navegador WAP", "funcao": None}}, "funcao": None},
     "4": {"titulo": "Configurações", "submenu": {"1": {"titulo": "Perfil", "funcao": None}, "2": {"titulo": "Data e Hora", "funcao": None}, "3": {"titulo": "Toques", "funcao": None}, "4": {"titulo": "Tela", "funcao": None}, "5": {"titulo": "Confs. Avançad.", 

@@ -188,7 +188,7 @@ ESTRUTURA_GRADE = [
     {"titulo": "Rádio", "icone": "📻", "ref": "radio"},
     {"titulo": "Gerenc. Arq", "icone": "📁", "ref": "arquivos", "funcao": FileManager.abrir_gerenciador},
     {"titulo": "Config.", "icone": "⚙️", "ref": "4"},
-    {"titulo": "Serviços", "icone": "🌐", "ref": "servicos"},
+    {"titulo": "Serviços", "icone": "🌐", "ref": "8"},
     {"titulo": "Ferramentas", "icone": "🛠️", "ref": "3"}
 ]
 
@@ -237,6 +237,28 @@ MENU_PRINCIPAL = {
             }}
         },
         "funcao": None
+    },
+    "8": {"titulo": "Serviços", "funcao": None,
+          "submenu": {
+            "1": {"titulo": "WAP", "submenu": {
+                "1": {"titulo": "Buscar endereç.", "funcao": None},
+                "2": {"titulo": "Favoritos", "funcao": None},
+                "3": {"titulo": "Portal Ursotel", "funcao": None},
+                "4": {"titulo": "Histórico nav.", "funcao": None}
+            }},
+            "2": {"titulo": "Bluetooth", "submenu": {
+                "1": {"titulo": "Habilitar", "funcao": None},
+                "2": {"titulo": "Desabilitar", "funcao": None},
+                "3": {"titulo": "Def. visibilid.", "funcao": None},
+                "4": {"titulo": "Parear disp.", "funcao": None}
+            }},
+            "3": {"titulo": "Serviços Operad", "submenu": {
+                "1": {"titulo": "Ursotel chip", "funcao": None},
+                "2": {"titulo": "Download Toques", "funcao": None},
+                "3": {"titulo": "Download Games", "funcao": None},
+                "4": {"titulo": "Brinde torpedos", "funcao": None}
+            }}
+          }
     }
 }
 
